@@ -1,0 +1,1531 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8" />
+    <title>Flappy Bird - Skins & Shop</title>
+    <style>
+        body {
+            background: #70c5ce;
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+        #gameCanvas {
+            display: block;
+            margin: 40px auto 0 auto;
+            background: #e0f7fa;
+            border: 3px solid #333;
+            border-radius: 12px;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.18);
+        }
+        #score {
+            position: absolute;
+            top: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255,255,255,0.8);
+            padding: 8px 30px;
+            border-radius: 8px;
+            font-size: 28px;
+            font-weight: bold;
+            color: #222;
+            letter-spacing: 2px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            user-select: none;
+            z-index: 10;
+        }
+        #bestScore {
+            position: absolute;
+            top: 56px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #e3eafc;
+            padding: 5px 18px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #2d89ef;
+            letter-spacing: 1px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            user-select: none;
+            z-index: 10;
+        }
+        #coins {
+            position: absolute;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fffde7;
+            padding: 7px 22px;
+            border-radius: 8px;
+            font-size: 22px;
+            font-weight: bold;
+            color: #ffb300;
+            letter-spacing: 1px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 10;
+        }
+        #coins img {
+            width: 26px;
+            height: 26px;
+            vertical-align: middle;
+        }
+        #restart {
+            display: none;
+            position: absolute;
+            top: 160px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ffeb3b;
+            color: #333;
+            font-size: 22px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            padding: 14px 36px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+            user-select: none;
+            z-index: 10;
+        }
+        #shopBtn {
+            position: absolute;
+            top: 24px;
+            right: 32px;
+            background: #fff;
+            font-size: 20px;
+            padding: 10px 30px;
+            border-radius: 8px;
+            border: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+            cursor: pointer;
+            user-select: none;
+            z-index: 20;
+        }
+        #dailyBtn {
+            position: absolute;
+            top: 24px;
+            left: 32px;
+            background: #ffe082;
+            color: #b28704;
+            font-size: 18px;
+            padding: 8px 22px;
+            border-radius: 8px;
+            border: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+            cursor: pointer;
+            user-select: none;
+            z-index: 20;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        #dailyBtn:disabled {
+            background: #ffe08299;
+            color: #b2870480;
+            cursor: not-allowed;
+        }
+        #startBtn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%,-50%);
+            background: #2d89ef;
+            color: #fff;
+            font-size: 2rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 12px;
+            padding: 22px 60px;
+            cursor: pointer;
+            box-shadow: 0 4px 24px rgba(45,137,239,0.15);
+            z-index: 15;
+            transition: background 0.2s, transform 0.2s;
+        }
+        #startBtn:hover {
+            background: #1b5fa7;
+            transform: translate(-50%,-50%) scale(1.04);
+        }
+        #shopModal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.4);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+        #shopModal .modal-content {
+            background: #fff;
+            padding: 30px 40px;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(45,137,239,0.15);
+            min-width: 320px;
+            max-width: 90vw;
+        }
+        #shopModal h2 {
+            margin-top: 0;
+            color: #2d89ef;
+            text-align: center;
+        }
+        #birdSkins, #pipeSkins {
+            display: flex;
+            gap: 18px;
+            margin: 10px 0 20px 0;
+            justify-content: center;
+        }
+        #birdSkins button, #pipeSkins button {
+            border: 3px solid #888;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            margin: 0 4px;
+            cursor: pointer;
+            outline: none;
+            transition: outline 0.2s, border 0.2s;
+            position: relative;
+        }
+        #pipeSkins button {
+            border-radius: 10px;
+        }
+        #birdSkins button.selected, #pipeSkins button.selected {
+            outline: 3px solid #2d89ef;
+            border: 3px solid #2d89ef;
+        }
+        .skin-price {
+            position: absolute;
+            bottom: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fffde7;
+            color: #ffb300;
+            font-size: 13px;
+            border-radius: 6px;
+            padding: 1px 7px;
+            border: 1px solid #ffe082;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .skin-locked {
+            filter: grayscale(1) brightness(0.8);
+            opacity: 0.7;
+        }
+        #closeShop {
+            margin-top: 10px;
+            padding: 8px 24px;
+            border-radius: 6px;
+            background: #2d89ef;
+            color: #fff;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #stats {
+            position: absolute;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fff;
+            color: #222;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+            padding: 10px 30px;
+            font-size: 1.1rem;
+            z-index: 10;
+            opacity: 0.97;
+            user-select: none;
+        }
+        /* Nové styly pro statistiky */
+        #statsPanel {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            background: #f7fafd;
+            border-radius: 14px;
+            box-shadow: 0 2px 12px rgba(45,137,239,0.13);
+            padding: 22px 36px 18px 36px;
+            min-width: 260px;
+            z-index: 120;
+            font-size: 1.1em;
+            color: #222;
+            opacity: 0.98;
+        }
+        #statsPanel .panel-title {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #2d89ef;
+            margin-bottom: 8px;
+        }
+        #statsPanel button {
+            margin-top: 10px;
+            padding: 5px 18px;
+            border-radius: 7px;
+            background: #e53935;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        @media (max-width: 900px) {
+            #gameCanvas { width: 98vw !important; height: 60vw !important; }
+        }
+        @media (max-width: 600px) {
+            #gameCanvas { width: 100vw !important; height: 70vw !important; }
+            #score, #bestScore, #coins, #restart, #shopBtn, #dailyBtn, #stats { font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <div id="score">Score: 0</div>
+    <div id="bestScore">Best: 0</div>
+    <div id="coins"><img src="https://cdn-icons-png.flaticon.com/512/138/138292.png" alt="coin" /> <span id="coinsNum">0</span></div>
+    <button id="restart">Restart</button>
+    <button id="shopBtn">Obchod</button>
+    <button id="dailyBtn">Denní odměna</button>
+    <button id="startBtn">Start</button>
+    <canvas id="gameCanvas" width="1500" height="1000"></canvas>
+
+    <div id="shopModal">
+      <div class="modal-content">
+        <h2>Obchod se skiny</h2>
+        <div>
+          <strong>Ptáček:</strong>
+          <div id="birdSkins"></div>
+        </div>
+        <div>
+          <strong>Trubky:</strong>
+          <div id="pipeSkins"></div>
+        </div>
+        <div style="margin:18px 0">
+          <strong>Levely:</strong>
+          <div id="levelSkins" style="display:flex;gap:18px;margin:10px 0 20px 0;justify-content:center;"></div>
+        </div>
+        <div id="achievementsPanel" style="margin:24px 0 0 0; padding:18px 12px 12px 12px; background:#f7fafd; border-radius:14px; box-shadow:0 2px 8px rgba(45,137,239,0.07);">
+          <div style="display:flex;align-items:center;gap:18px;">
+            <canvas id="birdPreview" width="70" height="70" style="background:transparent;display:block;"></canvas>
+            <div>
+              <strong>Achievementy:</strong>
+              <div id="achievementsList" style="margin-top:8px;"></div>
+            </div>
+          </div>
+        </div>
+        <button id="closeShop">Zavřít</button>
+      </div>
+    </div>
+    <div id="stats"></div>
+    <button id="openStatsBtn" style="
+        position: fixed;
+        bottom: 32px;
+        right: 32px;
+        z-index: 121;
+        background: #2d89ef;
+        color: #fff;
+        border: none;
+        border-radius: 50%;
+        width: 54px;
+        height: 54px;
+        font-size: 2em;
+        box-shadow: 0 2px 12px rgba(45,137,239,0.13);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s;
+    ">📊</button>
+    <div id="statsModal" style="
+        display: none;
+        position: fixed;
+        bottom: 0; right: 0; left: 0; top: 0;
+        background: rgba(0,0,0,0.35);
+        z-index: 130;
+        align-items: center;
+        justify-content: center;
+    ">
+      <div style="
+          background: #f7fafd;
+          border-radius: 18px;
+          box-shadow: 0 2px 24px rgba(45,137,239,0.18);
+          padding: 32px 44px 24px 44px;
+          min-width: 300px;
+          max-width: 90vw;
+          margin: 60px auto;
+          position: relative;
+          font-size: 1.1em;
+          color: #222;
+      ">
+        <div class="panel-title" style="font-weight:bold;font-size:1.2em;color:#2d89ef;margin-bottom:8px;">Statistiky</div>
+        <div id="statsContent"></div>
+        <button id="resetStatsBtn" style="margin-top:16px;padding:7px 22px;border-radius:7px;background:#e53935;color:#fff;border:none;cursor:pointer;font-weight:bold;">Reset statistik</button>
+        <button id="closeStatsBtn" style="position:absolute;top:14px;right:18px;background:none;border:none;font-size:1.7em;color:#2d89ef;cursor:pointer;">×</button>
+      </div>
+    </div>
+    <audio id="jumpSound" src="https://cdn.pixabay.com/audio/2022/07/26/audio_124bfa4c6b.mp3"></audio>
+    <audio id="coinSound" src="https://cdn.pixabay.com/audio/2022/07/26/audio_124bfa4c6b.mp3"></audio>
+    <audio id="hitSound" src="https://cdn.pixabay.com/audio/2022/07/26/audio_124bfa4c6b.mp3"></audio>
+    <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const scoreDiv = document.getElementById('score');
+    const bestScoreDiv = document.getElementById('bestScore');
+    const coinsDiv = document.getElementById('coinsNum');
+    const restartBtn = document.getElementById('restart');
+    const startBtn = document.getElementById('startBtn');
+    const dailyBtn = document.getElementById('dailyBtn');
+    const statsDiv = document.getElementById('stats');
+    // Zvuky
+    const jumpSound = document.getElementById('jumpSound');
+    const coinSound = document.getElementById('coinSound');
+    const hitSound = document.getElementById('hitSound');
+
+    // Skins a levely
+    const birdSkins = [
+        { name: "Žlutý", color: "#FFD600", border: "#FFB300", price: 0, shape: "classic" },
+        { name: "Modrý", color: "#42a5f5", border: "#1565c0", price: 8, shape: "classic" },
+        { name: "Růžový", color: "#f06292", border: "#ad1457", price: 12, shape: "classic" },
+        { name: "Zelený", color: "#66bb6a", border: "#388e3c", price: 15, shape: "classic" },
+        { name: "Černý", color: "#222", border: "#888", price: 20, shape: "classic" },
+        { name: "Rainbow", color: "linear-gradient(90deg, #ff1744, #fbc02d, #00e676, #2979ff, #d500f9)", border: "#fff", price: 30, special: true, shape: "classic" },
+        { name: "Gold", color: "#ffd700", border: "#bfa600", price: 50, special: true, shape: "classic" },
+        // Nové tvary:
+        { name: "Kulatý", color: "#ffb300", border: "#ff6f00", price: 18, shape: "round" },
+        { name: "Oválný", color: "#00e676", border: "#007d4a", price: 22, shape: "oval" },
+        { name: "Kachna", color: "#ffe082", border: "#b28704", price: 25, shape: "duck" },
+        { name: "Srdce", color: "#e53935", border: "#b71c1c", price: 28, shape: "heart" }
+    ];
+    const pipeSkins = [
+        { name: "Zelené", color: "#43A047", border: "#388E3C", price: 0, shape: "rect" },
+        { name: "Fialové", color: "#8e24aa", border: "#4a148c", price: 8, shape: "rect" },
+        { name: "Oranžové", color: "#ffb300", border: "#ff6f00", price: 12, shape: "rect" },
+        { name: "Modré", color: "#1976d2", border: "#0d47a1", price: 15, shape: "rect" },
+        { name: "Červené", color: "#e53935", border: "#b71c1c", price: 20, shape: "rect" },
+        { name: "Rainbow", color: "linear-gradient(90deg, #ff1744, #fbc02d, #00e676, #2979ff, #d500f9)", border: "#fff", price: 30, special: true, shape: "rect" },
+        { name: "Gold", color: "#ffd700", border: "#bfa600", price: 50, special: true, shape: "rect" },
+        // Nové tvary:
+        { name: "Kulaté", color: "#00bcd4", border: "#008ba3", price: 18, shape: "round" },
+        { name: "Trojúhelník", color: "#ff7043", border: "#bf360c", price: 22, shape: "triangle" },
+        { name: "Srdce", color: "#e91e63", border: "#ad1457", price: 28, shape: "heart" }
+    ];
+    const levels = [
+        { name: "Klasika", bg: "#70c5ce", pipeSpeed: 3.7, pipeGap: 300 },
+        { name: "Noc", bg: "#222", pipeSpeed: 4.2, pipeGap: 270 },
+        { name: "Duhový", bg: "linear-gradient(90deg,#ff1744,#fbc02d,#00e676,#2979ff,#d500f9)", pipeSpeed: 3.7, pipeGap: 320, special: true },
+        { name: "Gold", bg: "linear-gradient(90deg,#ffd700,#fffde7,#ffd700)", pipeSpeed: 4.5, pipeGap: 260, special: true }
+    ];
+    let selectedLevel = parseInt(localStorage.getItem('selectedLevel')) || 0;
+
+    // Uložené hodnoty
+    let selectedBirdSkin = parseInt(localStorage.getItem('birdSkin')) || 0;
+    let selectedPipeSkin = parseInt(localStorage.getItem('pipeSkin')) || 0;
+    let coins = parseInt(localStorage.getItem('coins')) || 0;
+    let unlockedBirds = JSON.parse(localStorage.getItem('unlockedBirds') || '[true,false,false,false,false,false,false]');
+    let unlockedPipes = JSON.parse(localStorage.getItem('unlockedPipes') || '[true,false,false,false,false,false,false]');
+    let unlockedLevels = JSON.parse(localStorage.getItem('unlockedLevels') || '[true,true,false,false]');
+    let bestScore = parseInt(localStorage.getItem('bestScore')) || 0;
+    let totalGames = parseInt(localStorage.getItem('totalGames')) || 0;
+    let totalCoins = parseInt(localStorage.getItem('totalCoins')) || 0;
+
+    // Constants
+    const BIRD_RADIUS = 30;
+    const GRAVITY = 0.2;
+    const JUMP = -7.5;
+    const PIPE_WIDTH = 90;
+    let PIPE_GAP = levels[selectedLevel].pipeGap;
+    let PIPE_SPEED = levels[selectedLevel].pipeSpeed;
+    const PIPE_INTERVAL = 140;
+    const MIN_PIPE_TOP = 80;
+    const MAX_PIPE_TOP = canvas.height - PIPE_GAP - 80;
+
+    let bird, pipes, score, gameOver, frameCount, gameStarted = false;
+
+    function resetGame() {
+        bird = {
+            x: 160,
+            y: canvas.height / 2,
+            velocity: 0
+        };
+        pipes = [];
+        score = 0;
+        frameCount = 0;
+        gameOver = false;
+        scoreDiv.textContent = `Score: 0`;
+        bestScoreDiv.textContent = `Best: ${bestScore}`;
+        restartBtn.style.display = 'none';
+        PIPE_GAP = levels[selectedLevel].pipeGap;
+        PIPE_SPEED = levels[selectedLevel].pipeSpeed;
+        if (levels[selectedLevel].bg.startsWith("linear-gradient")) {
+            document.body.style.background = levels[selectedLevel].bg;
+        } else {
+            document.body.style.background = levels[selectedLevel].bg;
+        }
+    }
+
+    function drawBird() {
+        ctx.save();
+        ctx.translate(bird.x, bird.y);
+        ctx.rotate(Math.min(Math.PI/4, bird.velocity / 15));
+        // Body
+        if (birdSkins[selectedBirdSkin].special && birdSkins[selectedBirdSkin].name === "Rainbow") {
+            let grad = ctx.createLinearGradient(-BIRD_RADIUS, 0, BIRD_RADIUS, 0);
+            grad.addColorStop(0, "#ff1744");
+            grad.addColorStop(0.25, "#fbc02d");
+            grad.addColorStop(0.5, "#00e676");
+            grad.addColorStop(0.75, "#2979ff");
+            grad.addColorStop(1, "#d500f9");
+            ctx.fillStyle = grad;
+        } else if (birdSkins[selectedBirdSkin].special && birdSkins[selectedBirdSkin].name === "Gold") {
+            let grad = ctx.createRadialGradient(0, 0, 10, 0, 0, BIRD_RADIUS);
+            grad.addColorStop(0, "#fffde7");
+            grad.addColorStop(1, "#ffd700");
+            ctx.fillStyle = grad;
+        } else {
+            ctx.fillStyle = birdSkins[selectedBirdSkin].color;
+        }
+        const skin = birdSkins[selectedBirdSkin];
+        if (skin.shape === "classic") {
+            ctx.beginPath();
+            ctx.arc(0, 0, BIRD_RADIUS, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = skin.border;
+            ctx.stroke();
+        } else if (skin.shape === "round") {
+            ctx.beginPath();
+            ctx.arc(0, 0, BIRD_RADIUS * 1.1, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = skin.border;
+            ctx.stroke();
+        } else if (skin.shape === "oval") {
+            ctx.beginPath();
+            ctx.ellipse(0, 0, BIRD_RADIUS * 1.2, BIRD_RADIUS * 0.8, 0, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = skin.border;
+            ctx.stroke();
+        } else if (skin.shape === "duck") {
+            ctx.beginPath();
+            ctx.ellipse(0, 5, BIRD_RADIUS * 1.1, BIRD_RADIUS * 0.7, 0, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = skin.border;
+            ctx.stroke();
+            // zobák navíc
+            ctx.beginPath();
+            ctx.moveTo(BIRD_RADIUS, 0);
+            ctx.lineTo(BIRD_RADIUS + 18, -8);
+            ctx.lineTo(BIRD_RADIUS + 18, 8);
+            ctx.closePath();
+            ctx.fillStyle = '#FF9800';
+            ctx.fill();
+        } else if (skin.shape === "heart") {
+            ctx.save();
+            ctx.scale(1.1, 1.1);
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.bezierCurveTo(0, -BIRD_RADIUS, -BIRD_RADIUS, -BIRD_RADIUS, -BIRD_RADIUS, 0);
+            ctx.bezierCurveTo(-BIRD_RADIUS, BIRD_RADIUS, 0, BIRD_RADIUS * 1.2, 0, BIRD_RADIUS * 1.7);
+            ctx.bezierCurveTo(0, BIRD_RADIUS * 1.2, BIRD_RADIUS, BIRD_RADIUS, BIRD_RADIUS, 0);
+            ctx.bezierCurveTo(BIRD_RADIUS, -BIRD_RADIUS, 0, -BIRD_RADIUS, 0, 0);
+            ctx.closePath();
+            ctx.fill();
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = skin.border;
+            ctx.stroke();
+            ctx.restore();
+        }
+        // Eye
+        ctx.beginPath();
+        ctx.arc(10, -10, 7, 0, 2 * Math.PI);
+        ctx.fillStyle = '#fff';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(13, -12, 3, 0, 2 * Math.PI);
+        ctx.fillStyle = '#222';
+        ctx.fill();
+        // Animated wing (pulsuje při skoku)
+        let wingY = Math.sin(frameCount / 4) * 6;
+        ctx.save();
+        ctx.rotate(-0.3);
+        ctx.beginPath();
+        ctx.ellipse(-5, 10 + wingY, 16, 8 + Math.abs(wingY), 0, 0, 2 * Math.PI);
+        ctx.fillStyle = "#fff";
+        ctx.globalAlpha = 0.7;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.restore();
+        // Beak
+        ctx.beginPath();
+        ctx.moveTo(BIRD_RADIUS - 2, 0);
+        ctx.lineTo(BIRD_RADIUS + 18, -8);
+        ctx.lineTo(BIRD_RADIUS + 18, 8);
+        ctx.closePath();
+        ctx.fillStyle = '#FF9800';
+        ctx.fill();
+        ctx.restore();
+    }
+
+    function drawPipes() {
+        pipes.forEach(pipe => {
+            const skin = pipeSkins[selectedPipeSkin];
+            ctx.save();
+            // Fill style
+            if (skin.special && skin.name === "Rainbow") {
+                let grad = ctx.createLinearGradient(pipe.x, 0, pipe.x + PIPE_WIDTH, 0);
+                grad.addColorStop(0, "#ff1744");
+                grad.addColorStop(0.25, "#fbc02d");
+                grad.addColorStop(0.5, "#00e676");
+                grad.addColorStop(0.75, "#2979ff");
+                grad.addColorStop(1, "#d500f9");
+                ctx.fillStyle = grad;
+            } else if (skin.special && skin.name === "Gold") {
+                let grad = ctx.createLinearGradient(pipe.x, 0, pipe.x + PIPE_WIDTH, 0);
+                grad.addColorStop(0, "#fffde7");
+                grad.addColorStop(1, "#ffd700");
+                ctx.fillStyle = grad;
+            } else {
+                ctx.fillStyle = skin.color;
+            }
+            ctx.strokeStyle = skin.border;
+            ctx.lineWidth = 4;
+
+            // Top pipe
+            if (skin.shape === "rect") {
+                ctx.beginPath();
+                ctx.rect(pipe.x, 0, PIPE_WIDTH, pipe.top);
+                ctx.fill();
+                ctx.stroke();
+            } else if (skin.shape === "round") {
+                ctx.beginPath();
+                ctx.moveTo(pipe.x, pipe.top);
+                ctx.arc(pipe.x + PIPE_WIDTH/2, pipe.top, PIPE_WIDTH/2, Math.PI, 0, false);
+                ctx.lineTo(pipe.x + PIPE_WIDTH, 0);
+                ctx.lineTo(pipe.x, 0);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            } else if (skin.shape === "triangle") {
+                ctx.beginPath();
+                ctx.moveTo(pipe.x, pipe.top);
+                ctx.lineTo(pipe.x + PIPE_WIDTH/2, 0);
+                ctx.lineTo(pipe.x + PIPE_WIDTH, pipe.top);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            } else if (skin.shape === "heart") {
+                // Draw a big heart, centered in the pipe area
+                ctx.save();
+                let heartW = PIPE_WIDTH * 1.2;
+                let heartH = pipe.top * 1.1;
+                let cx = pipe.x + PIPE_WIDTH/2;
+                let cy = pipe.top/2;
+                // Optional: draw a faint background for contrast
+                ctx.globalAlpha = 0.18;
+                ctx.fillStyle = "#fff";
+                ctx.fillRect(pipe.x, 0, PIPE_WIDTH, pipe.top);
+                ctx.globalAlpha = 1;
+                // Heart
+                ctx.translate(cx, cy);
+                ctx.scale(heartW/100, heartH/100);
+                ctx.beginPath();
+                ctx.moveTo(0, 30);
+                ctx.bezierCurveTo(0, 0, -50, 0, -50, 30);
+                ctx.bezierCurveTo(-50, 60, 0, 90, 0, 100);
+                ctx.bezierCurveTo(0, 90, 50, 60, 50, 30);
+                ctx.bezierCurveTo(50, 0, 0, 0, 0, 30);
+                ctx.closePath();
+                ctx.fillStyle = skin.color;
+                ctx.fill();
+                ctx.strokeStyle = skin.border;
+                ctx.lineWidth = 4;
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            // Bottom pipe
+            if (skin.shape === "rect") {
+                ctx.beginPath();
+                ctx.rect(pipe.x, pipe.top + PIPE_GAP, PIPE_WIDTH, canvas.height - pipe.top - PIPE_GAP);
+                ctx.fill();
+                ctx.stroke();
+            } else if (skin.shape === "round") {
+                ctx.beginPath();
+                ctx.moveTo(pipe.x, pipe.top + PIPE_GAP);
+                ctx.arc(pipe.x + PIPE_WIDTH/2, pipe.top + PIPE_GAP, PIPE_WIDTH/2, 0, Math.PI, false);
+                ctx.lineTo(pipe.x + PIPE_WIDTH, canvas.height);
+                ctx.lineTo(pipe.x, canvas.height);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            } else if (skin.shape === "triangle") {
+                ctx.beginPath();
+                ctx.moveTo(pipe.x, pipe.top + PIPE_GAP);
+                ctx.lineTo(pipe.x + PIPE_WIDTH/2, canvas.height);
+                ctx.lineTo(pipe.x + PIPE_WIDTH, pipe.top + PIPE_GAP);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            } else if (skin.shape === "heart") {
+                ctx.save();
+                let heartW = PIPE_WIDTH * 1.2;
+                let heartH = (canvas.height - pipe.top - PIPE_GAP) * 1.1;
+                let cx = pipe.x + PIPE_WIDTH/2;
+                let cy = pipe.top + PIPE_GAP + (canvas.height - pipe.top - PIPE_GAP)/2;
+                // Optional: draw a faint background for contrast
+                ctx.globalAlpha = 0.18;
+                ctx.fillStyle = "#fff";
+                ctx.fillRect(pipe.x, pipe.top + PIPE_GAP, PIPE_WIDTH, canvas.height - pipe.top - PIPE_GAP);
+                ctx.globalAlpha = 1;
+                // Heart
+                ctx.translate(cx, cy);
+                ctx.scale(heartW/100, heartH/100);
+                ctx.beginPath();
+                ctx.moveTo(0, 30);
+                ctx.bezierCurveTo(0, 0, -50, 0, -50, 30);
+                ctx.bezierCurveTo(-50, 60, 0, 90, 0, 100);
+                ctx.bezierCurveTo(0, 90, 50, 60, 50, 30);
+                ctx.bezierCurveTo(50, 0, 0, 0, 0, 30);
+                ctx.closePath();
+                ctx.fillStyle = skin.color;
+                ctx.fill();
+                ctx.strokeStyle = skin.border;
+                ctx.lineWidth = 4;
+                ctx.stroke();
+                ctx.restore();
+            }
+            ctx.restore();
+        });
+    }
+
+    function drawGround() {
+        ctx.fillStyle = '#A1887F';
+        ctx.fillRect(0, canvas.height - 60, canvas.width, 60);
+        ctx.fillStyle = '#8D6E63';
+        for (let i = 0; i < canvas.width; i += 50) {
+            ctx.fillRect(i, canvas.height - 60, 30, 20);
+        }
+    }
+
+    function updateBird() {
+        bird.velocity += GRAVITY;
+        bird.y += bird.velocity;
+    }
+
+    function addPipe() {
+        const top = Math.random() * (MAX_PIPE_TOP - MIN_PIPE_TOP) + MIN_PIPE_TOP;
+        pipes.push({ x: canvas.width, top: top, passed: false, golden: Math.random() < 0.08 });
+    }
+
+    function updatePipes() {
+        pipes.forEach(pipe => {
+            pipe.x -= PIPE_SPEED;
+        });
+        while (pipes.length && pipes[0].x + PIPE_WIDTH < 0) {
+            pipes.shift();
+        }
+    }
+
+    function checkCollisions() {
+        if (bird.y + BIRD_RADIUS > canvas.height - 60 || bird.y - BIRD_RADIUS < 0) {
+            return true;
+        }
+        for (const pipe of pipes) {
+            if (
+                bird.x + BIRD_RADIUS > pipe.x &&
+                bird.x - BIRD_RADIUS < pipe.x + PIPE_WIDTH &&
+                (
+                    bird.y - BIRD_RADIUS < pipe.top ||
+                    bird.y + BIRD_RADIUS > pipe.top + PIPE_GAP
+                )
+            ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // --- POKROČILÉ VYLEPŠENÍ ---
+    // 1. Přidání uživatelského jména a jeho uložení
+    let playerName = localStorage.getItem('playerName') || '';
+    function askName() {
+        if (!playerName) {
+            playerName = prompt('Zadej své jméno:', '');
+            if (playerName) {
+                localStorage.setItem('playerName', playerName);
+            } else {
+                playerName = 'Hráč';
+            }
+        }
+    }
+    askName();
+
+    // Zobraz jméno na obrazovce
+    const nameDiv = document.createElement('div');
+    nameDiv.id = 'playerName';
+    nameDiv.style.position = 'absolute';
+    nameDiv.style.top = '10px';
+    nameDiv.style.left = '50%';
+    nameDiv.style.transform = 'translateX(-50%)';
+    nameDiv.style.background = '#fff';
+    nameDiv.style.padding = '4px 18px';
+    nameDiv.style.borderRadius = '8px';
+    nameDiv.style.fontWeight = 'bold';
+    nameDiv.style.fontSize = '18px';
+    nameDiv.style.color = '#2d89ef';
+    nameDiv.style.zIndex = '12';
+    nameDiv.style.boxShadow = '0 2px 8px rgba(0,0,0,0.07)';
+    nameDiv.textContent = playerName;
+    document.body.appendChild(nameDiv);
+
+    // Možnost změnit jméno kliknutím
+    nameDiv.title = "Klikni pro změnu jména";
+    nameDiv.style.cursor = "pointer";
+    nameDiv.onclick = () => {
+        playerName = '';
+        localStorage.removeItem('playerName');
+        askName();
+        nameDiv.textContent = playerName;
+    };
+
+    // 2. Achievementy (odměny za dosažené milníky)
+    const achievements = [
+        { key: 'score10', text: 'Skóre 10!', test: () => bestScore >= 10, reward: 5 },
+        { key: 'score25', text: 'Skóre 25!', test: () => bestScore >= 25, reward: 10 },
+        { key: 'score50', text: 'Skóre 50!', test: () => bestScore >= 50, reward: 20 },
+        { key: 'games10', text: '10 her odehráno!', test: () => totalGames >= 10, reward: 10 },
+        { key: 'coins500', text: '500 mincí získáno!', test: () => totalCoins >= 500, reward: 20 }
+    ];
+    function checkAchievements() {
+        let unlocked = JSON.parse(localStorage.getItem('achievements') || '{}');
+        achievements.forEach(a => {
+            if (!unlocked[a.key] && a.test()) {
+                unlocked[a.key] = true;
+                coins += a.reward;
+                coinsDiv.textContent = coins;
+                localStorage.setItem('coins', coins);
+                // Ulož do pole pro pozdější zobrazení
+                unlockedAchievementsThisGame.push({ text: a.text, reward: a.reward });
+            }
+        });
+        localStorage.setItem('achievements', JSON.stringify(unlocked));
+    }
+
+    // 3. Animace pozadí pro duhový/gold level
+    function animateBackground() {
+        if (levels[selectedLevel].bg.startsWith("linear-gradient")) {
+            let t = (Date.now() / 40) % 100;
+            document.body.style.background = levels[selectedLevel].bg.replace('90deg', `${90 + t}deg`);
+        }
+        requestAnimationFrame(animateBackground);
+    }
+    animateBackground();
+
+    // 4. Efekt při získání mince (krátká animace u mincí)
+    function coinEffect() {
+        coinsDiv.animate([
+            { transform: 'scale(1)', color: '#ffb300' },
+            { transform: 'scale(1.2)', color: '#ffd700' },
+            { transform: 'scale(1)', color: '#ffb300' }
+        ], { duration: 350 });
+    }
+
+    // Úprava updateScore pro efekt a achievementy
+    function updateScore() {
+        pipes.forEach(pipe => {
+            if (!pipe.passed && bird.x > pipe.x + PIPE_WIDTH) {
+                pipe.passed = true;
+                score++;
+                scoreDiv.textContent = `Score: ${score}`;
+                let coinGain = pipe.golden ? 8 : 2;
+                coins += coinGain;
+                totalCoins += coinGain;
+                coinsDiv.textContent = coins;
+                localStorage.setItem('coins', coins);
+                localStorage.setItem('totalCoins', totalCoins);
+                coinEffect();
+                if (pipe.golden) {
+                    coinSound.play();
+                }
+                checkAchievements();
+            }
+        });
+    }
+
+    // 5. Možnost pauzy (mezerník nebo P)
+    let paused = false;
+    document.addEventListener('keydown', e => {
+        if (e.code === 'KeyP') {
+            paused = !paused;
+            if (!paused && gameStarted && !gameOver) requestAnimationFrame(gameLoop);
+        }
+    });
+    function gameLoop() {
+        if (paused) {
+            ctx.save();
+            ctx.font = 'bold 60px Arial';
+            ctx.fillStyle = '#2d89ef';
+            ctx.textAlign = 'center';
+            ctx.globalAlpha = 0.8;
+            ctx.fillText('PAUZA', canvas.width/2, canvas.height/2);
+            ctx.globalAlpha = 1;
+            ctx.restore();
+            return;
+        }
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawGround();
+        drawPipes();
+        drawBird();
+
+        // Zlata trubka
+        pipes.forEach(pipe => {
+            if (pipe.golden) {
+                ctx.save();
+                ctx.globalAlpha = 0.7;
+                ctx.fillStyle = "#ffd700";
+                ctx.fillRect(pipe.x, 0, PIPE_WIDTH, pipe.top);
+                ctx.fillRect(pipe.x, pipe.top + PIPE_GAP, PIPE_WIDTH, canvas.height - pipe.top - PIPE_GAP);
+                ctx.globalAlpha = 1;
+                ctx.restore();
+            }
+        });
+
+        if (!gameStarted) return;
+
+        if (!gameOver) {
+            updateBird();
+            if (frameCount % PIPE_INTERVAL === 0) addPipe();
+            updatePipes();
+            updateScore();
+
+            if (checkCollisions()) {
+                gameOver = true;
+                restartBtn.style.display = 'block';
+                hitSound.play();
+                totalGames++;
+                localStorage.setItem('totalGames', totalGames);
+                updateStats();
+            }
+        } else {
+            showGameOver();
+        }
+
+        frameCount++;
+        requestAnimationFrame(gameLoop);
+    }
+
+    function flap() {
+        if (!gameStarted) return;
+        if (!gameOver) {
+            bird.velocity = JUMP;
+            jumpSound.currentTime = 0;
+            jumpSound.play();
+        }
+    }
+
+    // Controls
+    document.addEventListener('keydown', e => {
+        if (e.code === 'Space') {
+            flap();
+            e.preventDefault();
+        }
+    });
+    canvas.addEventListener('mousedown', flap);
+    canvas.addEventListener('touchstart', e => { flap(); e.preventDefault(); });
+
+    restartBtn.addEventListener('click', () => {
+        resetGame();
+        gameStarted = false;
+        startBtn.style.display = 'block';
+    });
+
+    startBtn.addEventListener('click', () => {
+        resetGame();
+        gameStarted = true;
+        startBtn.style.display = 'none';
+        requestAnimationFrame(gameLoop);
+    });
+
+    // Denní odměna
+    function updateDailyBtn() {
+        const last = parseInt(localStorage.getItem('lastDaily')) || 0;
+        const now = Date.now();
+        if (now - last > 1000*60*60*24) {
+            dailyBtn.disabled = false;
+            dailyBtn.textContent = "Denní odměna";
+        } else {
+            dailyBtn.disabled = true;
+            let hodiny = Math.ceil((1000*60*60*24 - (now - last)) / (1000*60*60));
+            dailyBtn.textContent = `Zkus to za ${hodiny}h`;
+        }
+    }
+    dailyBtn.onclick = () => {
+        const last = parseInt(localStorage.getItem('lastDaily')) || 0;
+        const now = Date.now();
+        if (now - last > 1000*60*60*24) {
+            coins += 10;
+            totalCoins += 10;
+            coinsDiv.textContent = coins;
+            localStorage.setItem('coins', coins);
+            localStorage.setItem('totalCoins', totalCoins);
+            localStorage.setItem('lastDaily', now);
+            dailyBtn.disabled = true;
+            dailyBtn.textContent = "Zítra zas!";
+            updateStats();
+        }
+    };
+    setInterval(updateDailyBtn, 10000);
+    updateDailyBtn();
+
+    // SHOP LOGIC
+    const shopBtn = document.getElementById('shopBtn');
+    const shopModal = document.getElementById('shopModal');
+    const closeShop = document.getElementById('closeShop');
+    const birdSkinsDiv = document.getElementById('birdSkins');
+    const pipeSkinsDiv = document.getElementById('pipeSkins');
+    const levelSkinsDiv = document.getElementById('levelSkins');
+
+    function renderShop() {
+        birdSkinsDiv.innerHTML = '';
+        birdSkins.forEach((skin, i) => {
+            const btn = document.createElement('button');
+            if (skin.special && skin.name === "Rainbow") {
+                btn.style.background = "linear-gradient(90deg,#ff1744,#fbc02d,#00e676,#2979ff,#d500f9)";
+            } else if (skin.special && skin.name === "Gold") {
+                btn.style.background = "radial-gradient(circle,#fffde7 40%,#ffd700 100%)";
+            } else {
+                btn.style.background = skin.color;
+            }
+            btn.style.border = `3px solid ${skin.border}`;
+            btn.className = (i === selectedBirdSkin) ? 'selected' : '';
+            if (!unlockedBirds[i]) btn.classList.add('skin-locked');
+            btn.title = skin.name;
+            btn.onclick = () => {
+                if (unlockedBirds[i]) {
+                    selectedBirdSkin = i;
+                    localStorage.setItem('birdSkin', i);
+                    renderShop();
+                } else if (coins >= skin.price) {
+                    coins -= skin.price;
+                    coinsDiv.textContent = coins;
+                    unlockedBirds[i] = true;
+                    localStorage.setItem('coins', coins);
+                    localStorage.setItem('unlockedBirds', JSON.stringify(unlockedBirds));
+                    selectedBirdSkin = i;
+                    localStorage.setItem('birdSkin', i);
+                    renderShop();
+                }
+            };
+            if (skin.price > 0 && !unlockedBirds[i]) {
+                const priceDiv = document.createElement('div');
+                priceDiv.className = 'skin-price';
+                priceDiv.innerHTML = `<img src="https://cdn-icons-png.flaticon.com/512/138/138292.png" style="width:16px;height:16px;"> ${skin.price}`;
+                btn.appendChild(priceDiv);
+            }
+            birdSkinsDiv.appendChild(btn);
+        });
+
+        pipeSkinsDiv.innerHTML = '';
+        pipeSkins.forEach((skin, i) => {
+            const btn = document.createElement('button');
+            if (skin.special && skin.name === "Rainbow") {
+                btn.style.background = "linear-gradient(90deg,#ff1744,#fbc02d,#00e676,#2979ff,#d500f9)";
+            } else if (skin.special && skin.name === "Gold") {
+                btn.style.background = "radial-gradient(circle,#fffde7 40%,#ffd700 100%)";
+            } else {
+                btn.style.background = skin.color;
+            }
+            btn.style.border = `3px solid ${skin.border}`;
+            btn.className = (i === selectedPipeSkin) ? 'selected' : '';
+            if (!unlockedPipes[i]) btn.classList.add('skin-locked');
+            btn.title = skin.name;
+            btn.onclick = () => {
+                if (unlockedPipes[i]) {
+                    selectedPipeSkin = i;
+                    localStorage.setItem('pipeSkin', i);
+                    renderShop();
+                } else if (coins >= skin.price) {
+                    coins -= skin.price;
+                    coinsDiv.textContent = coins;
+                    unlockedPipes[i] = true;
+                    localStorage.setItem('coins', coins);
+                    localStorage.setItem('unlockedPipes', JSON.stringify(unlockedPipes));
+                    selectedPipeSkin = i;
+                    localStorage.setItem('pipeSkin', i);
+                    renderShop();
+                }
+            };
+            if (skin.price > 0 && !unlockedPipes[i]) {
+                const priceDiv = document.createElement('div');
+                priceDiv.className = 'skin-price';
+                priceDiv.innerHTML = `<img src="https://cdn-icons-png.flaticon.com/512/138/138292.png" style="width:16px;height:16px;"> ${skin.price}`;
+                btn.appendChild(priceDiv);
+            }
+            pipeSkinsDiv.appendChild(btn);
+        });
+
+        // Levely
+        levelSkinsDiv.innerHTML = '';
+        levels.forEach((level, i) => {
+            const btn = document.createElement('button');
+            btn.textContent = level.name;
+            btn.style.padding = "12px 18px";
+            btn.style.margin = "0 4px";
+            btn.style.fontWeight = "bold";
+            btn.style.borderRadius = "8px";
+            btn.style.border = (i === selectedLevel) ? "3px solid #2d89ef" : "2px solid #888";
+            btn.style.background = level.bg.startsWith("linear-gradient") ? level.bg : "#fff";
+            btn.style.color = (i === selectedLevel) ? "#2d89ef" : "#222";
+            if (!unlockedLevels[i]) btn.classList.add('skin-locked');
+            btn.onclick = () => {
+                if (unlockedLevels[i]) {
+                    selectedLevel = i;
+                    localStorage.setItem('selectedLevel', i);
+                    renderShop();
+                    resetGame();
+                }
+            };
+            if (level.special && !unlockedLevels[i]) {
+                const priceDiv = document.createElement('div');
+                priceDiv.className = 'skin-price';
+                priceDiv.innerHTML = `<img src="https://cdn-icons-png.flaticon.com/512/138/138292.png" style="width:16px;height:16px;"> 25`;
+                btn.appendChild(priceDiv);
+                btn.onclick = () => {
+                    if (coins >= 25) {
+                        coins -= 25;
+                        coinsDiv.textContent = coins;
+                        unlockedLevels[i] = true;
+                        localStorage.setItem('coins', coins);
+                        localStorage.setItem('unlockedLevels', JSON.stringify(unlockedLevels));
+                        selectedLevel = i;
+                        localStorage.setItem('selectedLevel', i);
+                        renderShop();
+                        resetGame();
+                    }
+                };
+            }
+            levelSkinsDiv.appendChild(btn);
+        });
+    }
+
+    shopBtn.onclick = () => {
+        renderShop();
+        shopModal.style.display = 'flex';
+    };
+    closeShop.onclick = () => {
+        shopModal.style.display = 'none';
+    };
+    shopModal.onclick = (e) => {
+        if (e.target === shopModal) shopModal.style.display = 'none';
+    };
+
+    // Přidej do HTML (třeba před </body>) nový kontejner pro achievementy:
+    const achievementPopup = document.createElement('div');
+    achievementPopup.id = 'achievementPopup';
+    achievementPopup.style.position = 'fixed';
+    achievementPopup.style.top = '30px';
+    achievementPopup.style.right = '30px';
+    achievementPopup.style.background = '#fff';
+    achievementPopup.style.color = '#2d89ef';
+    achievementPopup.style.fontWeight = 'bold';
+    achievementPopup.style.fontSize = '20px';
+    achievementPopup.style.padding = '18px 32px';
+    achievementPopup.style.borderRadius = '14px';
+    achievementPopup.style.boxShadow = '0 4px 24px rgba(45,137,239,0.18)';
+    achievementPopup.style.display = 'none';
+    achievementPopup.style.zIndex = '9999';
+    achievementPopup.style.transition = 'opacity 0.3s';
+    document.body.appendChild(achievementPopup);
+
+    // Funkce pro zobrazení popupu
+    function showAchievementPopup(text, reward) {
+        achievementPopup.innerHTML = `🏆 Achievement: ${text}<br><span style="color:#ffb300;font-size:1.1em;">+${reward} mincí</span>`;
+        achievementPopup.style.display = 'block';
+        achievementPopup.style.opacity = '1';
+        setTimeout(() => {
+            achievementPopup.style.opacity = '0';
+            setTimeout(() => {
+                achievementPopup.style.display = 'none';
+            }, 400);
+        }, 2200);
+    }
+
+    // Ulož si odemčené achievementy do pole pro zobrazení po hře
+    let unlockedAchievementsThisGame = [];
+
+    // Uprav funkci checkAchievements:
+    function checkAchievements() {
+        let unlocked = JSON.parse(localStorage.getItem('achievements') || '{}');
+        achievements.forEach(a => {
+            if (!unlocked[a.key] && a.test()) {
+                unlocked[a.key] = true;
+                coins += a.reward;
+                coinsDiv.textContent = coins;
+                localStorage.setItem('coins', coins);
+                // Ulož do pole pro pozdější zobrazení
+                unlockedAchievementsThisGame.push({ text: a.text, reward: a.reward });
+            }
+        });
+        localStorage.setItem('achievements', JSON.stringify(unlocked));
+    }
+
+    // Po skončení hry zobraz všechny nové achievementy (v showGameOver nebo těsně po gameOver = true)
+    function showGameOver() {
+        ctx.save();
+        ctx.globalAlpha = 0.85;
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(120, canvas.height/2 - 160, canvas.width - 240, 280);
+        ctx.globalAlpha = 1.0;
+        ctx.strokeStyle = '#888';
+        ctx.lineWidth = 4;
+        ctx.strokeRect(120, canvas.height/2 - 160, canvas.width - 240, 280);
+
+        ctx.fillStyle = '#222';
+        ctx.font = 'bold 48px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('Game Over!', canvas.width/2, canvas.height/2 - 70);
+
+        ctx.font = '32px Arial';
+        ctx.fillText(`Score: ${score}`, canvas.width/2, canvas.height/2);
+        bestScore = Math.max(score, bestScore || 0);
+        ctx.fillStyle = '#388E3C';
+        ctx.fillText(`Best: ${bestScore}`, canvas.width/2, canvas.height/2 + 60);
+        bestScoreDiv.textContent = `Best: ${bestScore}`;
+        localStorage.setItem('bestScore', bestScore);
+
+        // Zobraz achievementy po hře (sekvenčně)
+        if (unlockedAchievementsThisGame.length > 0) {
+            let i = 0;
+            function showNext() {
+                if (i < unlockedAchievementsThisGame.length) {
+                    showAchievementPopup(unlockedAchievementsThisGame[i].text, unlockedAchievementsThisGame[i].reward);
+                    i++;
+                    setTimeout(showNext, 2600);
+                } else {
+                    unlockedAchievementsThisGame = [];
+                }
+            }
+            showNext();
+        }
+    }
+
+    // Funkce pro vykreslení ptáčka do preview canvasu v obchodě
+    function drawBirdPreview() {
+        const preview = document.getElementById('birdPreview');
+        if (!preview) return;
+        const pctx = preview.getContext('2d');
+        pctx.clearRect(0, 0, preview.width, preview.height);
+        pctx.save();
+        pctx.translate(35, 35);
+        // Barva těla
+        if (birdSkins[selectedBirdSkin].special && birdSkins[selectedBirdSkin].name === "Rainbow") {
+            let grad = pctx.createLinearGradient(-30, 0, 30, 0);
+            grad.addColorStop(0, "#ff1744");
+            grad.addColorStop(0.25, "#fbc02d");
+            grad.addColorStop(0.5, "#00e676");
+            grad.addColorStop(0.75, "#2979ff");
+            grad.addColorStop(1, "#d500f9");
+            pctx.fillStyle = grad;
+        } else if (birdSkins[selectedBirdSkin].special && birdSkins[selectedBirdSkin].name === "Gold") {
+            let grad = pctx.createRadialGradient(0, 0, 10, 0, 0, 30);
+            grad.addColorStop(0, "#fffde7");
+            grad.addColorStop(1, "#ffd700");
+            pctx.fillStyle = grad;
+        } else {
+            pctx.fillStyle = birdSkins[selectedBirdSkin].color;
+        }
+        const skin = birdSkins[selectedBirdSkin];
+        if (skin.shape === "classic") {
+            pctx.beginPath();
+            pctx.arc(0, 0, 30, 0, 2 * Math.PI);
+            pctx.fill();
+            pctx.lineWidth = 4;
+            pctx.strokeStyle = skin.border;
+            pctx.stroke();
+        } else if (skin.shape === "round") {
+            pctx.beginPath();
+            pctx.arc(0, 0, 30 * 1.1, 0, 2 * Math.PI);
+            pctx.fill();
+            pctx.lineWidth = 4;
+            pctx.strokeStyle = skin.border;
+            pctx.stroke();
+        } else if (skin.shape === "oval") {
+            pctx.beginPath();
+            pctx.ellipse(0, 0, 30 * 1.2, 30 * 0.8, 0, 0, 2 * Math.PI);
+            pctx.fill();
+            pctx.lineWidth = 4;
+            pctx.strokeStyle = skin.border;
+            pctx.stroke();
+        } else if (skin.shape === "duck") {
+            pctx.beginPath();
+            pctx.ellipse(0, 5, 30 * 1.1, 30 * 0.7, 0, 0, 2 * Math.PI);
+            pctx.fill();
+            pctx.lineWidth = 4;
+            pctx.strokeStyle = skin.border;
+            pctx.stroke();
+            // zobák navíc
+            pctx.beginPath();
+            pctx.moveTo(28, 0);
+            pctx.lineTo(48, -8);
+            pctx.lineTo(48, 8);
+            pctx.closePath();
+            pctx.fillStyle = '#FF9800';
+            pctx.fill();
+        } else if (skin.shape === "heart") {
+            pctx.save();
+            pctx.scale(1.1, 1.1);
+            pctx.beginPath();
+            pctx.moveTo(0, 0);
+            pctx.bezierCurveTo(0, -30, -30, -30, -30, 0);
+            pctx.bezierCurveTo(-30, 30, 0, 30 * 1.2, 0, 30 * 1.7);
+            pctx.bezierCurveTo(0, 30 * 1.2, 30, 30, 30, 0);
+            pctx.bezierCurveTo(30, -30, 0, -30, 0, 0);
+            pctx.closePath();
+            pctx.fill();
+            pctx.lineWidth = 4;
+            pctx.strokeStyle = skin.border;
+            pctx.stroke();
+            pctx.restore();
+        }
+        // Oko
+        pctx.beginPath();
+        pctx.arc(10, -10, 7, 0, 2 * Math.PI);
+        pctx.fillStyle = '#fff';
+        pctx.fill();
+        pctx.beginPath();
+        pctx.arc(13, -12, 3, 0, 2 * Math.PI);
+        pctx.fillStyle = '#222';
+        pctx.fill();
+        // Křídlo
+        pctx.save();
+        pctx.rotate(-0.3);
+        pctx.beginPath();
+        pctx.ellipse(-5, 10, 16, 8, 0, 0, 2 * Math.PI);
+        pctx.fillStyle = "#fff";
+        pctx.globalAlpha = 0.7;
+        pctx.fill();
+        pctx.globalAlpha = 1;
+        pctx.restore();
+        // Zobák
+        pctx.beginPath();
+        pctx.moveTo(28, 0);
+        pctx.lineTo(48, -8);
+        pctx.lineTo(48, 8);
+        pctx.closePath();
+        pctx.fillStyle = '#FF9800';
+        pctx.fill();
+        pctx.restore();
+    }
+
+    // Funkce pro vykreslení achievementů v obchodě
+    function renderAchievementsPanel() {
+        const achievementsList = document.getElementById('achievementsList');
+        if (!achievementsList) return;
+        let unlocked = JSON.parse(localStorage.getItem('achievements') || '{}');
+        achievementsList.innerHTML = achievements.map(a => {
+            const isUnlocked = unlocked[a.key];
+            return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+                <span style="font-size:1.3em;">${isUnlocked ? "✅" : "⬜"}</span>
+                <span style="color:${isUnlocked ? "#388e3c" : "#888"};font-weight:${isUnlocked ? "bold" : "normal"}">${a.text}</span>
+                <span style="margin-left:auto;color:#ffb300;font-size:0.95em;">${a.reward} mincí</span>
+            </div>`;
+        }).join('');
+        drawBirdPreview();
+    }
+
+    // Zajisti vykreslení panelu při otevření obchodu a po změně skinu
+    function renderShop() {
+        birdSkinsDiv.innerHTML = '';
+        birdSkins.forEach((skin, i) => {
+            const btn = document.createElement('button');
+            if (skin.special && skin.name === "Rainbow") {
+                btn.style.background = "linear-gradient(90deg,#ff1744,#fbc02d,#00e676,#2979ff,#d500f9)";
+            } else if (skin.special && skin.name === "Gold") {
+                btn.style.background = "radial-gradient(circle,#fffde7 40%,#ffd700 100%)";
+            } else {
+                btn.style.background = skin.color;
+            }
+            btn.style.border = `3px solid ${skin.border}`;
+            btn.className = (i === selectedBirdSkin) ? 'selected' : '';
+            if (!unlockedBirds[i]) btn.classList.add('skin-locked');
+            btn.title = skin.name;
+            btn.onclick = () => {
+                if (unlockedBirds[i]) {
+                    selectedBirdSkin = i;
+                    localStorage.setItem('birdSkin', i);
+                    renderShop();
+                } else if (coins >= skin.price) {
+                    coins -= skin.price;
+                    coinsDiv.textContent = coins;
+                    unlockedBirds[i] = true;
+                    localStorage.setItem('coins', coins);
+                    localStorage.setItem('unlockedBirds', JSON.stringify(unlockedBirds));
+                    selectedBirdSkin = i;
+                    localStorage.setItem('birdSkin', i);
+                    renderShop();
+                }
+            };
+            if (skin.price > 0 && !unlockedBirds[i]) {
+                const priceDiv = document.createElement('div');
+                priceDiv.className = 'skin-price';
+                priceDiv.innerHTML = `<img src="https://cdn-icons-png.flaticon.com/512/138/138292.png" style="width:16px;height:16px;"> ${skin.price}`;
+                btn.appendChild(priceDiv);
+            }
+            birdSkinsDiv.appendChild(btn);
+        });
+
+        pipeSkinsDiv.innerHTML = '';
+        pipeSkins.forEach((skin, i) => {
+            const btn = document.createElement('button');
+            if (skin.special && skin.name === "Rainbow") {
+                btn.style.background = "linear-gradient(90deg,#ff1744,#fbc02d,#00e676,#2979ff,#d500f9)";
+            } else if (skin.special && skin.name === "Gold") {
+                btn.style.background = "radial-gradient(circle,#fffde7 40%,#ffd700 100%)";
+            } else {
+                btn.style.background = skin.color;
+            }
+            btn.style.border = `3px solid ${skin.border}`;
+            btn.className = (i === selectedPipeSkin) ? 'selected' : '';
+            if (!unlockedPipes[i]) btn.classList.add('skin-locked');
+            btn.title = skin.name;
+            btn.onclick = () => {
+                if (unlockedPipes[i]) {
+                    selectedPipeSkin = i;
+                    localStorage.setItem('pipeSkin', i);
+                    renderShop();
+                } else if (coins >= skin.price) {
+                    coins -= skin.price;
+                    coinsDiv.textContent = coins;
+                    unlockedPipes[i] = true;
+                    localStorage.setItem('coins', coins);
+                    localStorage.setItem('unlockedPipes', JSON.stringify(unlockedPipes));
+                    selectedPipeSkin = i;
+                    localStorage.setItem('pipeSkin', i);
+                    renderShop();
+                }
+            };
+            if (skin.price > 0 && !unlockedPipes[i]) {
+                const priceDiv = document.createElement('div');
+                priceDiv.className = 'skin-price';
+                priceDiv.innerHTML = `<img src="https://cdn-icons-png.flaticon.com/512/138/138292.png" style="width:16px;height:16px;"> ${skin.price}`;
+                btn.appendChild(priceDiv);
+            }
+            pipeSkinsDiv.appendChild(btn);
+        });
+
+        // Levely
+        levelSkinsDiv.innerHTML = '';
+        levels.forEach((level, i) => {
+            const btn = document.createElement('button');
+            btn.textContent = level.name;
+            btn.style.padding = "12px 18px";
+            btn.style.margin = "0 4px";
+            btn.style.fontWeight = "bold";
+            btn.style.borderRadius = "8px";
+            btn.style.border = (i === selectedLevel) ? "3px solid #2d89ef" : "2px solid #888";
+            btn.style.background = level.bg.startsWith("linear-gradient") ? level.bg : "#fff";
+            btn.style.color = (i === selectedLevel) ? "#2d89ef" : "#222";
+            if (!unlockedLevels[i]) btn.classList.add('skin-locked');
+            btn.onclick = () => {
+                if (unlockedLevels[i]) {
+                    selectedLevel = i;
+                    localStorage.setItem('selectedLevel', i);
+                    renderShop();
+                    resetGame();
+                }
+            };
+            if (level.special && !unlockedLevels[i]) {
+                const priceDiv = document.createElement('div');
+                priceDiv.className = 'skin-price';
+                priceDiv.innerHTML = `<img src="https://cdn-icons-png.flaticon.com/512/138/138292.png" style="width:16px;height:16px;"> 25`;
+                btn.appendChild(priceDiv);
+                btn.onclick = () => {
+                    if (coins >= 25) {
+                        coins -= 25;
+                        coinsDiv.textContent = coins;
+                        unlockedLevels[i] = true;
+                        localStorage.setItem('coins', coins);
+                        localStorage.setItem('unlockedLevels', JSON.stringify(unlockedLevels));
+                        selectedLevel = i;
+                        localStorage.setItem('selectedLevel', i);
+                        renderShop();
+                        resetGame();
+                    }
+                };
+            }
+            levelSkinsDiv.appendChild(btn);
+        });
+
+        renderAchievementsPanel();
+    }
+
+    // Otevření/zavření statistik
+    const openStatsBtn = document.getElementById('openStatsBtn');
+    const statsModal = document.getElementById('statsModal');
+    const closeStatsBtn = document.getElementById('closeStatsBtn');
+    openStatsBtn.onclick = () => { statsModal.style.display = 'flex'; updateStatsPanel(); };
+    closeStatsBtn.onclick = () => { statsModal.style.display = 'none'; };
+    statsModal.onclick = (e) => { if (e.target === statsModal) statsModal.style.display = 'none'; };
+
+    // Funkce pro aktualizaci statistik v okně
+    function updateStatsPanel() {
+        const statsContent = document.getElementById('statsContent');
+        if (!statsContent) return;
+        statsContent.innerHTML = `
+            <div>Jméno: <b>${playerName}</b></div>
+            <div>Nejlepší skóre: <b>${bestScore}</b></div>
+            <div>Celkem her: <b>${totalGames}</b></div>
+            <div>Celkem mincí: <b>${totalCoins}</b></div>
+            <div>Odemčené skiny: <b>${unlockedBirds.filter(x=>x).length}/${birdSkins.length}</b></div>
+            <div>Odemčené trubky: <b>${unlockedPipes.filter(x=>x).length}/${pipeSkins.length}</b></div>
+            <div>Odemčené levely: <b>${unlockedLevels.filter(x=>x).length}/${levels.length}</b></div>
+            <div>Splněné achievementy: <b>${Object.values(JSON.parse(localStorage.getItem('achievements')||'{}')).filter(x=>x).length}/${achievements.length}</b></div>
+        `;
+    }
+    updateStatsPanel();
+
+    // Aktualizuj statistiky i při změně jména
+    nameDiv.onclick = () => {
+        playerName = '';
+        localStorage.removeItem('playerName');
+        askName();
+        nameDiv.textContent = playerName;
+        updateStatsPanel();
+    };
+
+    // Aktualizuj statistiky po každé relevantní akci
+    function updateStats() {
+        updateStatsPanel();
+    }
+
+    // Reset statistik
+    document.getElementById('resetStatsBtn').onclick = () => {
+        if (confirm('Opravdu chceš vymazat všechny statistiky?')) {
+            bestScore = 0;
+            totalGames = 0;
+            totalCoins = 0;
+            localStorage.setItem('bestScore', 0);
+            localStorage.setItem('totalGames', 0);
+            localStorage.setItem('totalCoins', 0);
+            localStorage.setItem('achievements', '{}');
+            updateStatsPanel();
+            updateStats();
+            alert('Statistiky byly vynulovány.');
+        }
+    };
+
+    // Start game
+    coinsDiv.textContent = coins;
+    bestScoreDiv.textContent = `Best: ${bestScore}`;
+    updateStats();
+    resetGame();
+    startBtn.style.display = 'block';
+    gameStarted = false;
+    gameLoop();
+    </script>
+</body>
+</html>
